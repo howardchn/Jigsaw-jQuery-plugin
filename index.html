@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <meta charset="gb2312">
+		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+		<link rel="stylesheet" href="themes/jquery.mobile.structure-1.0.css"></link>
+		<link rel="stylesheet" href="themes/jquery.mobile-1.0.css"></link>
+		<script type="text/javascript" src="themes/jquery.js"></script>
+		<script type="text/javascript" src="themes/jquery.mobile-1.0.js"></script>
+		<script type="text/javascript" src="themes/jigsawplugin.js"></script>
+		<script type="text/javascript" src="themes/paints.js"></script>
+	</head>
+	<body>
+		<div id="index" data-role="page" style="background-image:url(images/2.jpg)">
+			<div data-role="header" data-theme="a">
+				<h1>Puzzle</h1>
+			</div>
+
+			<div data-role="content" >	
+				<fieldset data-role="controlgroup" data-type="horizontal">
+					<input type="radio" name="radio-choice-1" id="radio-view-1" value="3" class="custom" /> 
+					<label for="radio-view-1">Easy</label> 
+	 
+					<input type="radio" name="radio-choice-1" id="radio-view-2" value="4" class="custom" checked /> 
+					<label for="radio-view-2">Middle</label> 
+	 
+					<input type="radio" name="radio-choice-1" id="radio-view-3" value="5" class="custom" /> 
+					<label for="radio-view-3">Hard</label>    
+				</fieldset>
+				<div class="content-primary">
+					<ul id="listPanel" data-role="listview" data-inset="true" data-filter="false">
+					</ul>
+				</div>
+			</div>
+		</div>
+		
+		<div data-role="page" id="jpanel" style="background-image:url(images/2.jpg)">
+			<div data-role="header">
+				<h1 id="jname"></h1> <a href="#index">Home</a> 
+			</div>
+
+			<div id="gamePanelContainer" data-role="content">
+				<div id="gamePanel" />
+			</div>
+			
+			<div class="ui-body ui-body-b">
+				<img id="artthumb" align="left" width="40px" style="border:solid 1px gray; margin-right:10px;"></img>
+				<div id="artname" ></div>
+				<div style="font-size:10px;font-family:verdana;" id="artauthor"></div>
+				<pre id="description"></pre>
+			</div>
+		</div>
+		
+		<script type="text/javascript">
+			var level = 4;
+			var list = $('#listPanel');
+			var currentPaint = null;
+			for(var i=0; i<paints.length; i++){
+				var item = $('<li><a href="#jpanel?id=' + paints[i].id + '">' + paints[i].name + '</a></li>');
+				list.append(item);
+			}
+			
+			$("input[type='radio']").bind( "change", function(event, ui) {
+				level = parseInt($(event.currentTarget).attr('value'));
+			});	
+						
+			$(document).bind('pagebeforechange', function(e, data){
+				var toPage = data.toPage.toString();
+				if(toPage.indexOf('#') != -1){
+					var pageUri = toPage.substr(toPage.indexOf('#') + 1);
+					
+					if(pageUri.indexOf('jpanel?id=') != -1){
+						var sid = pageUri.substr(10);
+						var id = parseInt(sid) - 1;
+						var paint = paints[id];
+						currentPaint = paint;
+						$('#jname').text(paint.name);
+						$('#artname').text(paint.name);
+						$('#artauthor').text(paint.author);
+						$('#artthumb').attr('src', 'images/' + paint.url);
+						$('#gamePanel').empty();
+						$.jigsaw('gamePanel', 'images/' + paint.url, 290, level, 16, function(){
+							$.ajax({url:'themes/' + currentPaint.description,dataType:'text',success:function(e){
+								$('#description').append(e);
+							}});
+						});
+					}
+				}
+			});
+		</script>
+	</body>
+</html>
